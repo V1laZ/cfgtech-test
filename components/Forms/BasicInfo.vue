@@ -52,6 +52,10 @@ const errors = reactive({
 });
 
 const validate = () => {
+  Object.keys(errors).forEach(
+    (key) => (errors[key as keyof typeof errors] = "")
+  );
+
   if (!firstName.value) {
     errors.firstName = "Jméno je povinné";
   }
