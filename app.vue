@@ -1,7 +1,6 @@
 <template>
   <div class="min-h-screen flex items-center bg-gray-50 py-8">
     <div class="max-w-4xl mx-auto w-full">
-      {{ form }}
       <div class="max-w-4xl mx-auto mb-8 px-8">
         <div class="hidden sm:flex justify-between">
           <div
