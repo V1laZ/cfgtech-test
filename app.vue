@@ -134,9 +134,6 @@ const nextStep = () => {
   if (currentStep.value === 1 && !basicInfo.value?.validate()) {
     return;
   }
-  if (currentStep.value === 2 && !identification.value?.validate()) {
-    return;
-  }
 
   if (currentStep.value < steps.length - 1) {
     currentStep.value++;
