@@ -2,47 +2,54 @@
   <form class="w-full max-w-4xl mx-auto space-y-6 p-4">
     <div class="flex flex-col gap-6">
       <BaseInputText
-        v-model.trim="firstName"
+        :model-value="localModel.firstName"
+        @update:model-value="updateModel('firstName', $event)"
         label="Jméno"
         placeholder="Zadejte vaše jméno"
         :error-message="errors.firstName"
-        @update:model-value="errors.firstName = ''"
       />
 
       <BaseInputText
-        v-model.trim="lastName"
+        :model-value="localModel.lastName"
+        @update:model-value="updateModel('lastName', $event)"
         label="Přijmení"
         placeholder="Zadejte vaše přijmení"
         :error-message="errors.lastName"
-        @update:model-value="errors.lastName = ''"
       />
 
       <BaseInputText
-        v-model.trim="email"
+        :model-value="localModel.email"
+        @update:model-value="updateModel('email', $event)"
         label="Email"
         placeholder="email@example.com"
         :error-message="errors.email"
-        @update:model-value="errors.email = ''"
       />
 
       <BaseInputText
-        v-model.trim="phone"
+        :model-value="localModel.phone"
+        @update:model-value="updateModel('phone', $event)"
         label="Tel. číslo"
         placeholder="777 777 777"
         :error-message="errors.phone"
-        @update:model-value="errors.phone = ''"
       />
     </div>
   </form>
 </template>
 
 <script setup lang="ts">
-const { validateEmail, validatePhone } = useValidate();
+type ModelProp = Pick<
+  RegisterForm,
+  "firstName" | "lastName" | "email" | "phone"
+>;
 
-const firstName = ref("");
-const lastName = ref("");
-const email = ref("");
-const phone = ref("");
+const props = defineProps<{
+  modelValue: Readonly<ModelProp>;
+}>();
+const emit = defineEmits<{
+  "update:modelValue": [value: ModelProp];
+}>();
+
+const { validateEmail, validatePhone } = useValidate();
 
 const errors = reactive({
   firstName: "",
@@ -51,33 +58,48 @@ const errors = reactive({
   phone: "",
 });
 
+const localModel = ref<ModelProp>({ ...props.modelValue });
+
+watchEffect(() => {
+  localModel.value = { ...props.modelValue };
+});
+
+const updateModel = <K extends keyof ModelProp>(
+  key: K,
+  value: ModelProp[K]
+) => {
+  localModel.value[key] = value;
+  errors[key] = "";
+  emit("update:modelValue", localModel.value);
+};
+
 const validate = () => {
   Object.keys(errors).forEach(
     (key) => (errors[key as keyof typeof errors] = "")
   );
 
-  if (!firstName.value) {
+  if (!localModel.value.firstName) {
     errors.firstName = "Jméno je povinné";
   }
-  if (!lastName.value) {
+  if (!localModel.value.lastName) {
     errors.lastName = "Přijmení je povinné";
   }
 
-  if (!email.value) {
+  if (!localModel.value.email) {
     errors.email = "Email je povinný";
   }
 
-  if (!phone.value) {
+  if (!localModel.value.phone) {
     errors.phone = "Tel. číslo je povinné";
   }
 
-  if (email.value && !validateEmail(email.value)) {
+  if (localModel.value.email && !validateEmail(localModel.value.email)) {
     errors.email = "Neplatný email";
   }
 
-  if (phone.value) {
-    phone.value = phone.value.replace(/\s/g, "");
-    if (!validatePhone(phone.value)) {
+  if (localModel.value.phone) {
+    updateModel("phone", localModel.value.phone.replace(/\s/g, ""));
+    if (!validatePhone(localModel.value.phone)) {
       errors.phone = "Neplatné tel. číslo";
     }
   }
@@ -86,12 +108,7 @@ const validate = () => {
     return false;
   }
 
-  return {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    email: email.value,
-    phone: phone.value,
-  };
+  return true;
 };
 
 defineExpose({

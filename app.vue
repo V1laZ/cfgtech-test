@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center bg-gray-50 py-8">
     <div class="max-w-4xl mx-auto w-full">
+      {{ form }}
       <div class="max-w-4xl mx-auto mb-8 px-8">
         <div class="hidden sm:flex justify-between">
           <div
@@ -40,7 +41,23 @@
       </div>
 
       <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6">
-        <component :is="steps[currentStep].component" ref="currentFormRef" />
+        <div v-if="currentStep === 0">
+          <FormsInvestValue v-model="form.monthlyInvest" />
+        </div>
+        <div v-else-if="currentStep === 1">
+          <FormsBasicInfo
+            ref="basicInfo"
+            :model-value="form"
+            @update:model-value="form = { ...form, ...$event }"
+          />
+        </div>
+        <div v-else-if="currentStep === 2">
+          <FormsIdentification
+            ref="identification"
+            :model-value="form"
+            @update:model-value="form = { ...form, ...$event }"
+          />
+        </div>
 
         <div class="flex justify-between mt-8">
           <button
@@ -65,32 +82,45 @@
 </template>
 
 <script setup lang="ts">
-import FormsBasicInfo from "@/components/Forms/BasicInfo.vue";
-import FormsIdentification from "@/components/Forms/Identification.vue";
-import FormsInvestValue from "@/components/Forms/InvestValue.vue";
+const basicInfo = useTemplateRef("basicInfo");
+const identification = useTemplateRef("identification");
 
 const currentStep = ref(0);
-const currentFormRef = ref();
+
+const form = ref<RegisterForm>({
+  monthlyInvest: 150,
+  street: "",
+  city: "",
+  zipCode: "",
+  birthdate: "",
+  email: "",
+  firstName: "",
+  idCard: "",
+  lastName: "",
+  phone: "",
+  ssn: "",
+});
 
 const steps = [
   {
     title: "Investice",
-    component: FormsInvestValue,
   },
   {
     title: "Základní údaje",
-    component: FormsBasicInfo,
   },
   {
     title: "Identifikace",
-    component: FormsIdentification,
   },
 ];
 
 const nextStep = () => {
-  if (currentFormRef.value?.validate && !currentFormRef.value.validate()) {
+  if (currentStep.value === 1 && !basicInfo.value?.validate()) {
     return;
   }
+  if (currentStep.value === 2 && !identification.value?.validate()) {
+    return;
+  }
+
   if (currentStep.value < steps.length - 1) {
     currentStep.value++;
   }
