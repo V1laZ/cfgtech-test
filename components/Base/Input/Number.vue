@@ -14,6 +14,7 @@
         type="number"
         :value="modelValue"
         @input="handleInputEvent"
+        @blur="handleBlurEvent"
         :min="min"
         :max="max"
         :placeholder="placeholder"
@@ -51,8 +52,6 @@ const modelValue = defineModel<number>({
   required: true,
   set(value) {
     if (isNaN(value)) return min ?? 0;
-    if (min && value < min) return min;
-    if (max && value > max) return max;
     return value;
   },
 });
@@ -65,5 +64,20 @@ const handleInputEvent = ($event: Event) => {
   nextTick(() => {
     eventTarget.value = modelValue.value.toString();
   });
+};
+
+const handleBlurEvent = ($event: Event) => {
+  const eventTarget = $event.target as HTMLInputElement;
+  if (min && modelValue.value < min) {
+    modelValue.value = min;
+    eventTarget.value = min.toString();
+    return;
+  }
+
+  if (max && modelValue.value > max) {
+    modelValue.value = max;
+    eventTarget.value = max.toString();
+    return;
+  }
 };
 </script>
