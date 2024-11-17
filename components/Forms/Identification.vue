@@ -36,6 +36,13 @@
         :error-message="errors.idCard"
       />
 
+      <BaseInputText
+        :model-value="localModel.iban"
+        @update:model-value="updateModel('iban', $event)"
+        label="IBAN"
+        placeholder="Zadejte IBAN"
+      />
+
       <div class="col-span-full space-y-4">
         <BaseInputText
           :model-value="localModel.street"
@@ -68,9 +75,11 @@
 </template>
 
 <script setup lang="ts">
+import { isValidIBAN } from "ibantools";
+
 type ModelProp = Pick<
   RegisterForm,
-  "ssn" | "idCard" | "birthdate" | "street" | "city" | "zipCode"
+  "ssn" | "idCard" | "birthdate" | "street" | "city" | "zipCode" | "iban"
 >;
 
 const props = defineProps<{
@@ -89,6 +98,7 @@ const errors = reactive({
   street: "",
   city: "",
   zipCode: "",
+  iban: "",
 });
 
 const localModel = ref<ModelProp>({ ...props.modelValue });
@@ -101,7 +111,7 @@ const updateModel = <K extends keyof ModelProp>(
   key: K,
   value: ModelProp[K]
 ) => {
-  localModel.value[key] = value;
+  localModel.value[key] = value.trim();
   errors[key] = "";
   emit("update:modelValue", localModel.value);
 };
@@ -190,6 +200,9 @@ const validate = () => {
   if (!localModel.value.zipCode) {
     errors.zipCode = "PSČ je povinné";
   }
+  if (!localModel.value.iban) {
+    errors.iban = "IBAN je povinný";
+  }
 
   if (localModel.value.ssn) {
     const ssnError = validateCzechId(localModel.value.ssn);
@@ -205,6 +218,11 @@ const validate = () => {
   if (localModel.value.idCard && !validateIdCard(localModel.value.idCard)) {
     errors.idCard = "Neplatné číslo občanského průkazu";
   }
+
+  if (localModel.value.iban && !isValidIBAN(localModel.value.iban)) {
+    errors.iban = "Neplatný IBAN";
+  }
+
   if (Object.values(errors).some((error) => error)) {
     return false;
   }

@@ -99,6 +99,7 @@ const form = ref<RegisterForm>({
   lastName: "",
   phone: "",
   ssn: "",
+  iban: "",
 });
 
 const steps = [

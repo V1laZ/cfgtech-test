@@ -10,4 +10,5 @@ type RegisterForm = {
   street: string;
   city: string;
   zipCode: string;
+  iban: string;
 };

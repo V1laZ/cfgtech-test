@@ -68,7 +68,7 @@ const updateModel = <K extends keyof ModelProp>(
   key: K,
   value: ModelProp[K]
 ) => {
-  localModel.value[key] = value;
+  localModel.value[key] = value.trim();
   errors[key] = "";
   emit("update:modelValue", localModel.value);
 };
