@@ -41,6 +41,7 @@
         @update:model-value="updateModel('iban', $event)"
         label="IBAN"
         placeholder="Zadejte IBAN"
+        :error-message="errors.iban"
       />
 
       <div class="col-span-full space-y-4">
