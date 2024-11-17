@@ -56,6 +56,14 @@
             :model-value="form"
             @update:model-value="form = { ...form, ...$event }"
           />
+          <div class="mt-4">
+            <label>
+              <input type="checkbox" v-model="gdprCheck" />
+              <span class="text-gray-800 ml-2"
+                >Souhlasím se zpracováním osobních údajů</span
+              >
+            </label>
+          </div>
         </div>
 
         <div class="flex justify-between mt-8">
@@ -74,6 +82,15 @@
           >
             Další
           </button>
+
+          <button
+            v-if="currentStep === steps.length - 1"
+            @click="submitForm"
+            :disabled="!gdprCheck"
+            class="ml-auto px-4 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-green-500"
+          >
+            Odeslat
+          </button>
         </div>
       </div>
     </div>
@@ -85,7 +102,7 @@ const basicInfo = useTemplateRef("basicInfo");
 const identification = useTemplateRef("identification");
 
 const currentStep = ref(0);
-
+const gdprCheck = ref(false);
 const form = ref<RegisterForm>({
   monthlyInvest: 150,
   street: "",
@@ -130,5 +147,12 @@ const prevStep = () => {
   if (currentStep.value > 0) {
     currentStep.value--;
   }
+};
+
+const submitForm = () => {
+  if (!identification.value?.validate()) {
+    return;
+  }
+  // Code to submit the form ($fetch POST request)
 };
 </script>
